@@ -23,7 +23,7 @@ def generate_y0(params, condition_params):
     return jnp.array([prey_init, predator_init])
 
 
-def simulate_ode(params, condition_params, y0, t0, t1, dt):
+def simulate_ode(params, condition_params, y0, t0, t1, dt, timepoints=None):
     """
     Simulates the Lotka-Volterra ODE system for given parameters and initial conditions.
 
@@ -39,22 +39,33 @@ def simulate_ode(params, condition_params, y0, t0, t1, dt):
         numpy.ndarray: Array of simulated values for prey and predator populations over time.
     """
 
-    solver = dfx.Kvaerno5()
-    term = dfx.ODETerm(lotka_volterra)
-    stepsize_controller = dfx.PIDController(rtol=1e-6, atol=1e-8)  # adaptive step-size
-    sol = dfx.diffeqsolve(
-        term,
-        solver,
-        t0=t0,
-        t1=t1,
-        dt0=dt,
-        y0=y0,
-        args=(params, condition_params),  # Pass params and condition_params as tuple
-        stepsize_controller=stepsize_controller,
-    )
+    # Set default results times
+    if not timepoints:
+        timepoints = np.linspace(t0, t1, 100)
 
-    print(f"Number of time points: {len(sol.ts)}")  # Check the number of time steps
-    print(f"Final time point: {sol.ts[-1]}")
-    print(f"Shape of the solution: {sol.ys.shape}")  # Should be (number of time points, 2)
+    try:
+        solver = dfx.Kvaerno5()
+        term = dfx.ODETerm(lotka_volterra)
+        stepsize_controller = dfx.PIDController(
+            rtol=1e-6, atol=1e-8
+        )  # adaptive step-size
+        sol = dfx.diffeqsolve(
+            term,
+            solver,
+            t0=t0,
+            t1=t1,
+            dt0=dt,
+            saveat=dfx.SaveAt(ts=jnp.array(timepoints)),
+            y0=y0,
+            args=(params, condition_params,),  # Pass params and condition_params as tuple
+            stepsize_controller=stepsize_controller,
+        )
 
-    return np.array(sol.ys)
+        # Check integration success
+        assert len(sol.ts) == len(timepoints), "Incorrect ts eval!"  # Check the number of time steps
+        assert sol.ts[-1] == t1, "Incorrect t1 reached!"
+        assert sol.ys.shape == (len(timepoints),len(y0),), "Incorrect sol shape!"  # Should be (num time points, num states)
+        return np.array(sol.ys)
+
+    except Exception as e:
+        raise (f"Integration failed on: {e}")

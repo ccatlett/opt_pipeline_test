@@ -47,14 +47,15 @@ def create_noisy_data(params, condition_params_list, t0, t1, dt, noise_percentag
     # Save to pickle file
     with open(output_file, "wb") as f:
         pickle.dump(data, f)
-    print(f"Data saved to {output_file}")
+    print(f"\nData saved to {output_file}")
 
 
 if __name__ == "__main__":
     params = np.array([0.5, 0.02, 0.01, 0.4], dtype=np.float64)  # Lotka-Volterra parameters: alpha, beta, delta, gamma
     condition_params_list = np.array([[40.0, 9.0], [35.0, 10.0], [45.0, 8.0]], dtype=np.float64)  # Initial populations of prey and predator
-    t0, t1, dt = 0.0, 0.1, 0.01  # Time range and step size
-    noise_percentage = 5.0  # Percentage of noise
+    t0, t1, dt = 0.0, 10.0, 1e-3
+    timepoints = np.linspace(t0, t1, 500)
+    noise_percentage = 0.0
     output_file = "data/syn_data_lv.pkl"
 
     create_noisy_data(params, condition_params_list, t0, t1, dt, noise_percentage, output_file)
@@ -63,23 +64,24 @@ if __name__ == "__main__":
     with open(output_file, "rb") as f:
         loaded_data = pickle.load(f)
 
-    # Step 3: Inspect the data
     print("\nConfirmation test:\n")
     print("\tLoaded data structure:", type(loaded_data))
     print("\tNumber of conditions:", len(loaded_data))
 
-    # Check the structure of each entry
+    # Check the structure of each dataset
     for idx, (loaded_params, loaded_condition_params, loaded_y0, loaded_noised_data) in enumerate(loaded_data):
         print(f"\n\tCondition {idx + 1}:")
-        print("\t\tParameters (params):", loaded_params)
+        print("\t\tParameters:", loaded_params)
         print("\t\tCondition-specific params:", loaded_condition_params)
         print("\t\tInitial conditions (y0):", loaded_y0)
-        print("\t\tNoised data (sample):", loaded_noised_data)  # Print the first few rows to confirm structure
 
-        # Basic checks for correctness
+        loaded_data_noise_str = np.array_str(loaded_noised_data[:5], max_line_width=50)  # Print the first few rows to confirm structure
+        loaded_data_noise_str = loaded_data_noise_str.replace("\n", "\n\t\t\t\t      ")
+        print("\t\tNoised data (sample):", loaded_data_noise_str) 
+
         assert np.allclose(params, loaded_params), "Params do not match!"
         assert np.allclose(condition_params_list[idx], loaded_condition_params), "Condition-specific params do not match!"
         assert len(loaded_noised_data) > 0, "Noised data is empty!"
         assert loaded_noised_data.shape[1] == 2, "Noised data should have two columns (prey, predator)."
 
-    print("\nTest completed: Data structure and values appear correct.")
+    print("\nTest completed: Data structure and values appear correct.\n")
