@@ -65,7 +65,7 @@ def simulate_ode(params, condition_params, y0, t0, t1, dt, timepoints=None):
         assert len(sol.ts) == len(timepoints), "Incorrect ts eval!"  # Check the number of time steps
         assert sol.ts[-1] == t1, "Incorrect t1 reached!"
         assert sol.ys.shape == (len(timepoints),len(y0),), "Incorrect sol shape!"  # Should be (num time points, num states)
-        return np.array(sol.ys)
+        return np.array(sol.ts), np.array(sol.ys)
 
     except Exception as e:
         raise (f"Integration failed on: {e}")

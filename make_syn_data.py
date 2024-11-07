@@ -33,7 +33,7 @@ def create_noisy_data(params, condition_params_list, t0, t1, dt, noise_percentag
         y0 = generate_y0(params, condition_params)
 
         # Simulate ODE
-        clean_data = simulate_ode(params, condition_params, y0, t0, t1, dt)
+        clean_data_t, clean_data = simulate_ode(params, condition_params, y0, t0, t1, dt)
 
         # Add noise
         noise = (noise_percentage / 100
@@ -42,7 +42,7 @@ def create_noisy_data(params, condition_params_list, t0, t1, dt, noise_percentag
         noised_data = clean_data + noise
 
         # Collect tuple of (params, condition_params, y0, noised_data)
-        data.append((params, condition_params, y0, noised_data))
+        data.append((params, condition_params, y0, clean_data_t, noised_data))
 
     # Save to pickle file
     with open(output_file, "wb") as f:
@@ -69,11 +69,12 @@ if __name__ == "__main__":
     print("\tNumber of conditions:", len(loaded_data))
 
     # Check the structure of each dataset
-    for idx, (loaded_params, loaded_condition_params, loaded_y0, loaded_noised_data) in enumerate(loaded_data):
+    for idx, (loaded_params, loaded_condition_params, loaded_y0, loaded_t, loaded_noised_data) in enumerate(loaded_data):
         print(f"\n\tCondition {idx + 1}:")
         print("\t\tParameters:", loaded_params)
         print("\t\tCondition-specific params:", loaded_condition_params)
         print("\t\tInitial conditions (y0):", loaded_y0)
+        print("\t\tTimes solved (sample):", loaded_t[:5])
 
         loaded_data_noise_str = np.array_str(loaded_noised_data[:5], max_line_width=50)  # Print the first few rows to confirm structure
         loaded_data_noise_str = loaded_data_noise_str.replace("\n", "\n\t\t\t\t      ")
