@@ -40,7 +40,7 @@ def simulate_ode(params, condition_params, y0, t0, t1, dt, timepoints=None):
     """
 
     # Set default results times
-    if not timepoints:
+    if timepoints is None:
         timepoints = np.linspace(t0, t1, 100)
 
     try:
