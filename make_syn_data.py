@@ -47,12 +47,11 @@ def create_noisy_data(params, condition_params_list, t0, t1, dt, noise_percentag
     # Save to pickle file
     with open(output_file, "wb") as f:
         pickle.dump(data, f)
-    print(f"\nData saved to {output_file}")
 
 
 if __name__ == "__main__":
     params = np.array([0.5, 0.02, 0.01, 0.4], dtype=np.float64)  # Lotka-Volterra parameters: alpha, beta, delta, gamma
-    condition_params_list = np.array([[40.0, 9.0], [10.0, 35.0], [8.0, 10.0]], dtype=np.float64)  # Initial populations of prey and predator
+    condition_params_list = np.array([[40.0, 9.0]], dtype=np.float64)  # Initial populations of prey and predator
     t0, t1, dt = 0.0, 50.0, 1e-3
     timepoints = np.linspace(t0, t1, 500)
     noise_percentage = 0.0
@@ -64,8 +63,8 @@ if __name__ == "__main__":
     with open(output_file, "rb") as f:
         loaded_data = pickle.load(f)
 
-    print("\nConfirmation test:\n")
-    print("\tLoaded data structure:", type(loaded_data))
+    print("\nData summary:\n")
+    print("\tData structure:", type(loaded_data))
     print("\tNumber of conditions:", len(loaded_data))
 
     # Check the structure of each dataset
@@ -85,4 +84,13 @@ if __name__ == "__main__":
         assert len(loaded_noised_data) > 0, "Noised data is empty!"
         assert loaded_noised_data.shape[1] == len(loaded_y0), "Noised data has incorrect columns!"
 
-    print("\nTest completed: Data structure and values appear correct.\n")
+    print("\nTests completed: Data structure and values appear correct.\n")
+
+    # Clean up extraneous info in pkl
+    cleaned_loaded_data = []
+    for (loaded_params, loaded_condition_params, loaded_y0, loaded_t, loaded_noised_data) in loaded_data:
+        cleaned_loaded_data.append((loaded_t, loaded_noised_data))
+    with open(output_file, "wb") as f:
+        pickle.dump(cleaned_loaded_data, f)
+    print(f"Data cleaned and written to {output_file}\n")
+    
