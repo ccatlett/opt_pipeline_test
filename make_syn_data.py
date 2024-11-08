@@ -51,10 +51,10 @@ def create_noisy_data(params, condition_params_list, t0, t1, dt, noise_percentag
 
 if __name__ == "__main__":
     params = np.array([0.5, 0.02, 0.01, 0.4], dtype=np.float64)  # Lotka-Volterra parameters: alpha, beta, delta, gamma
-    condition_params_list = np.array([[40.0, 9.0]], dtype=np.float64)  # Initial populations of prey and predator
+    condition_params_list = np.array([[40.0, 9.0], [10.0, 35.0]], dtype=np.float64)  # Initial populations of prey and predator
     t0, t1, dt = 0.0, 50.0, 1e-3
     timepoints = np.linspace(t0, t1, 500)
-    noise_percentage = 0.0
+    noise_percentage = 0.5
     output_file = "data/syn_data_lv.pkl"
 
     create_noisy_data(params, condition_params_list, t0, t1, dt, noise_percentage, output_file, timepoints)
