@@ -25,7 +25,7 @@ def optimize_parameters(study_name, data_file, n_trials):
     )
     study = optuna.create_study(direction="minimize",
                                 sampler=sampler,
-                                storage=f"sqlite:////Users/ccat/opt_pipeline_test/results/{study_name}/{study_name}_db.sqlite3",
+                                storage=f"sqlite:////{os.getcwd()}/results/{study_name}/{study_name}_db.sqlite3",
                                 study_name=study_name,)
     study.optimize(lambda tr : objective(tr, loaded_data),
                     n_trials=n_trials,
